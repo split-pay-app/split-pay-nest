@@ -8,6 +8,7 @@ export class PersonsController {
 
   @Post()
   create(@Body() createPersonDto: CreatePersonDto) {
-    return this.personsService.create(createPersonDto);
+    const person = this.personsService.create(createPersonDto);
+    return person;
   }
 }

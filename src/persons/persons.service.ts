@@ -1,19 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Person } from './entities/person.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+
+import { User, UserType } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class PersonsService {
   constructor(
-    @InjectRepository(Person) private personRepository: Repository<Person>,
+    private dataSource: DataSource,
+    private userService: UsersService,
   ) {}
 
   async create(createPersonDto: CreatePersonDto): Promise<Person> {
-    const person = await this.personRepository.save(createPersonDto);
-    return person;
+    let person = null;
+    let savedUser = null;
+    const user = await this.userService.generateUser({
+      ...createPersonDto,
+      type: UserType.PERSON,
+    });
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      savedUser = await queryRunner.manager.save(User, user);
+      person = await queryRunner.manager.save(Person, {
+        ...createPersonDto,
+        user: savedUser,
+      });
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException({
+        message: 'An error occured',
+      });
+    } finally {
+      await queryRunner.release();
+    }
+
+    return { ...person, user: savedUser };
   }
 
   findAll() {

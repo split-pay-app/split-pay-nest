@@ -14,7 +14,7 @@ export const databaseProviders = [
       database: configService.get('DATABASE_NAME'),
       entities: ['dist/**/*.entity{.ts,.js}'],
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
       logging: true,
     }),
   }),
