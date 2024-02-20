@@ -6,6 +6,7 @@ import { Person } from './entities/person.entity';
 
 import { User, UserType } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { UpdatePersonDto } from './dto/update-person.dto';
 
 @Injectable()
 export class PersonsService {
@@ -45,7 +46,33 @@ export class PersonsService {
     return { ...person, user: savedUser };
   }
 
-  findAll() {
-    return `This action returns all persons`;
+  async update(createPersonDto: UpdatePersonDto): Promise<Person> {
+    let person = null;
+    let savedUser = null;
+    const userParams = {
+      password: createPersonDto.password,
+      taxpayerNumber: createPersonDto.taxpayerNumber,
+    };
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      savedUser = await queryRunner.manager.save(User, userParams);
+      person = await queryRunner.manager.save(Person, {
+        ...createPersonDto,
+        user: savedUser,
+      });
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException({
+        message: 'An error occured',
+      });
+    } finally {
+      await queryRunner.release();
+    }
+
+    return { ...person, user: savedUser };
   }
 }

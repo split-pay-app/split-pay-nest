@@ -15,7 +15,7 @@ export const databaseProviders = [
       entities: ['dist/**/*.entity{.ts,.js}'],
       autoLoadEntities: true,
       synchronize: true,
-      logging: true,
+      logging: false,
     }),
   }),
 ];

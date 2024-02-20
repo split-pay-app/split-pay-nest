@@ -7,6 +7,7 @@ import { DebitsModule } from './debits/debits.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { PersonsModule } from './persons/persons.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PersonsModule } from './persons/persons.module';
     UsersModule,
     DebitsModule,
     PersonsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
