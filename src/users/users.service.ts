@@ -50,6 +50,7 @@ export class UsersService {
       where: filters,
       take: options?.limit,
       skip: options?.offset,
+      relations: { person: true },
     });
   }
 }

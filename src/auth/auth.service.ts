@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { AuthenticationDto } from './dto/authenticationDto';
 import { JwtService } from '@nestjs/jwt';
+import { AuthenticationOutputDto } from './dto/authenticationOutputDto';
 
 @Injectable()
 export class AuthService {
@@ -10,7 +11,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async authenticate(authenticationDto: AuthenticationDto) {
+  async authenticate(
+    authenticationDto: AuthenticationDto,
+  ): Promise<AuthenticationOutputDto> {
     const [user] = await this.userService.findBy([
       { taxpayerNumber: authenticationDto.uniqueKey },
       { email: authenticationDto.uniqueKey },
@@ -24,11 +27,18 @@ export class AuthService {
     );
 
     if (!passwordCorrect) {
-      throw new UnauthorizedException({ message: 'Login or invalid' });
+      throw new UnauthorizedException({ message: 'Login or password invalid' });
     }
     const token = await this.jwtService.signAsync({ userId: user.id });
     return {
-      user,
+      user: {
+        id: user.id,
+        firstName: user.person.firstName,
+        lastName: user.person.lastName,
+        email: user.email,
+        taxpayerNumber: user.taxpayerNumber,
+        phoneNumber: user.phoneNumber,
+      },
       token,
     };
   }

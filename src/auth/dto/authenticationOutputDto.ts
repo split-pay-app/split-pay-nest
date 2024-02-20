@@ -1,6 +1,11 @@
-import { User } from 'src/users/entities/user.entity';
-
 export class AuthenticationOutputDto {
-  user: User;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    taxpayerNumber: string;
+    phoneNumber: string;
+  };
   token: string;
 }
