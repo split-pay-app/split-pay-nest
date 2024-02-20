@@ -12,7 +12,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ select: false })
+  @Column()
   password: string;
 
   @Column({ unique: true })
@@ -33,14 +33,12 @@ export class User {
   })
   person: Person;
 
-  private readonly cryptoSalts: number;
-
   constructor(createUserDto: CreateUserDto) {
-    this.cryptoSalts = 10;
     Object.assign(this, createUserDto);
   }
   async normalize(): Promise<User> {
-    this.password = await bcrypt.hash(this.password, this.cryptoSalts);
+    const cryptoSalts = 10;
+    this.password = await bcrypt.hash(this.password, cryptoSalts);
     return this;
   }
   async comparePassword(password: string): Promise<boolean> {

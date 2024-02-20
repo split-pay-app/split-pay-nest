@@ -45,7 +45,7 @@ export class UsersService {
     data: Record<string, any>[],
     options?: { limit?: number; offset?: number },
   ): Promise<User[]> {
-    const filters = this.generateFilters(data);
+    const filters = data.map(this.generateFilters);
     return this.userRepository.find({
       where: filters,
       take: options?.limit,
