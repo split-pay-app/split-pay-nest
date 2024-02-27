@@ -1,7 +1,14 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { Person } from 'src/persons/entities/person.entity';
 import * as bcrypt from 'bcrypt';
+import { Debit } from 'src/debits/entities/debit.entity';
 
 export enum UserType {
   PERSON = 'PERSON',
@@ -32,6 +39,9 @@ export class User {
     onUpdate: 'CASCADE',
   })
   person: Person;
+
+  @OneToMany(() => Debit, (debit) => debit.owner)
+  debits: Debit[];
 
   constructor(createUserDto: CreateUserDto) {
     Object.assign(this, createUserDto);

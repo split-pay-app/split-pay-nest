@@ -1,6 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { DebitsService } from './debits.service';
 import { CreateDebitDto } from './dto/create-debit.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { UserId } from 'src/decorators/userId.decorator';
 import { UpdateDebitDto } from './dto/update-debit.dto';
 
 @Controller('debits')
@@ -8,27 +17,21 @@ export class DebitsController {
   constructor(private readonly debitsService: DebitsService) {}
 
   @Post()
-  create(@Body() createDebitDto: CreateDebitDto) {
-    return this.debitsService.create(createDebitDto);
+  @UseGuards(AuthGuard)
+  create(@Body() createDebitDto: CreateDebitDto, @UserId() userId: string) {
+    return this.debitsService.create({
+      ...createDebitDto,
+      owner: userId,
+      status: 'OPEN',
+    });
   }
-
-  @Get()
-  findAll() {
-    return this.debitsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.debitsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDebitDto: UpdateDebitDto) {
-    return this.debitsService.update(+id, updateDebitDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.debitsService.remove(+id);
+  @Patch('/:debitId')
+  @UseGuards(AuthGuard)
+  update(
+    @Body() updateDebitDto: UpdateDebitDto,
+    @UserId() userId: string,
+    @Param('debitId') debitId: string,
+  ) {
+    return this.debitsService.update(debitId, updateDebitDto);
   }
 }

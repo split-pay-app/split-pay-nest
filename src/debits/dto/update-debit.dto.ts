@@ -1,4 +1,9 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateDebitDto } from './create-debit.dto';
-
-export class UpdateDebitDto extends PartialType(CreateDebitDto) {}
+export class UpdateDebitDto {
+  title: string;
+  date: Date;
+  description: string;
+  category: string;
+  image: string;
+  totalValue: number;
+  status: string;
+}
