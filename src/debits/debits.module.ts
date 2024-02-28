@@ -5,9 +5,13 @@ import { EncrypterModule } from 'src/encrypter/encrypter.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Debit } from './entities/debit.entity';
 import { User } from 'src/users/entities/user.entity';
+import { DebitPayer } from './entities/debitPayer.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Debit, User]), EncrypterModule],
+  imports: [
+    TypeOrmModule.forFeature([Debit, User, DebitPayer]),
+    EncrypterModule,
+  ],
   controllers: [DebitsController],
   providers: [DebitsService],
 })

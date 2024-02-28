@@ -9,6 +9,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { Person } from 'src/persons/entities/person.entity';
 import * as bcrypt from 'bcrypt';
 import { Debit } from 'src/debits/entities/debit.entity';
+import { DebitPayer } from 'src/debits/entities/debitPayer.entity';
 
 export enum UserType {
   PERSON = 'PERSON',
@@ -42,6 +43,9 @@ export class User {
 
   @OneToMany(() => Debit, (debit) => debit.owner)
   debits: Debit[];
+
+  @OneToMany(() => DebitPayer, (payer) => payer.user)
+  payers: User[];
 
   constructor(createUserDto: CreateUserDto) {
     Object.assign(this, createUserDto);
