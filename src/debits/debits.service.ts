@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDebitDto } from './dto/create-debit.dto';
 import { Repository } from 'typeorm';
 import { Debit } from './entities/debit.entity';
@@ -17,8 +17,16 @@ export class DebitsService {
   }
 
   async update(id: string, updateDebitDto: UpdateDebitDto) {
-    const debit = this.debitRepository.create(updateDebitDto);
-
-    return this.debitRepository.save({ id: id, ...debit });
+    const debitExists = await this.debitRepository.findOne({ where: { id } });
+    if (!debitExists) {
+      throw new NotFoundException({ message: 'Debit not exists' });
+    }
+    const debit = this.debitRepository.create({
+      id,
+      ...debitExists,
+      ...updateDebitDto,
+    });
+    const result = await this.debitRepository.save(debit);
+    return result;
   }
 }
