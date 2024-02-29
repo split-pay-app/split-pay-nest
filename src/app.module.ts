@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { PersonsModule } from './persons/persons.module';
 import { AuthModule } from './auth/auth.module';
+import { PaymentMadeRequestModule } from './payment-made-request/payment-made-request.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from './auth/auth.module';
     DebitsModule,
     PersonsModule,
     AuthModule,
+    PaymentMadeRequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],

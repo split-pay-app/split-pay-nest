@@ -46,7 +46,7 @@ export class DebitsService {
       this.debitPayerRepository.create({
         ...payer,
         debit: debitExists,
-        user: debitExists.owner,
+        user: payer.userId,
       }),
     );
     await this.debitPayerRepository.save(payersCreated);
