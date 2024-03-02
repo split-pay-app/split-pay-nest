@@ -35,6 +35,18 @@ export class DebitsService {
     return result;
   }
 
+  async getDebit(userId: string, debitId: string) {
+    const debit = await this.debitRepository.findOne({
+      where: { id: debitId },
+      relations: {
+        payers: { user: { person: true } },
+        owner: { person: true },
+      },
+    });
+
+    return this.calculateShouldPay(userId, debit);
+  }
+
   async addPayer(id: string, payers: AddPayerDto[]) {
     const debitExists = await this.debitRepository.findOne({
       where: { id },

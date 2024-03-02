@@ -5,6 +5,7 @@ import {
   UseGuards,
   Param,
   Patch,
+  Get,
 } from '@nestjs/common';
 import { DebitsService } from './debits.service';
 import { CreateDebitDto } from './dto/create-debit.dto';
@@ -51,6 +52,14 @@ export class DebitsController {
     @Param('debitId') debitId: string,
   ) {
     const debit = await this.debitsService.addPayer(debitId, addPayerDto);
+
+    return { debit };
+  }
+
+  @Get('/:debitId')
+  @UseGuards(AuthGuard)
+  async getDebit(@UserId() userId: string, @Param('debitId') debitId: string) {
+    const debit = await this.debitsService.getDebit(userId, debitId);
 
     return { debit };
   }

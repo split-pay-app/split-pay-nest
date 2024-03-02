@@ -48,6 +48,14 @@ export class UsersService {
     const filters = data.map(this.generateFilters);
     return this.userRepository.find({
       where: filters,
+      select: {
+        id: true,
+        password: true,
+        email: true,
+        phoneNumber: true,
+        taxpayerNumber: true,
+        type: true,
+      },
       take: options?.limit,
       skip: options?.offset,
       relations: { person: true },
