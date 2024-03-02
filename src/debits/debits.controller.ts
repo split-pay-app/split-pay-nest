@@ -12,6 +12,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UserId } from 'src/decorators/userId.decorator';
 import { UpdateDebitDto } from './dto/update-debit.dto';
 import { AddPayerDto } from './dto/add-payer-dto';
+import { SearchDebitsDto } from './dto/search-debits.dto';
 
 @Controller('debits')
 export class DebitsController {
@@ -52,5 +53,17 @@ export class DebitsController {
     const debit = await this.debitsService.addPayer(debitId, addPayerDto);
 
     return { debit };
+  }
+
+  @Post('/show')
+  @UseGuards(AuthGuard)
+  async list(@Body() search: SearchDebitsDto, @UserId() userId: string) {
+    const offset = (search.page - 1) * search.limit;
+    const debits = await this.debitsService.listByFilters(userId, {
+      ...search,
+      offset,
+    });
+
+    return { debits, page: search.page, limit: search.limit };
   }
 }

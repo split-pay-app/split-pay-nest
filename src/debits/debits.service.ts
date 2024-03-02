@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDebitDto } from './dto/create-debit.dto';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Debit } from './entities/debit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateDebitDto } from './dto/update-debit.dto';
 import { AddPayerDto } from './dto/add-payer-dto';
 import { DebitPayer } from './entities/debitPayer.entity';
+import { SearchDebitsDto } from './dto/search-debits.dto';
 
 @Injectable()
 export class DebitsService {
@@ -56,6 +57,45 @@ export class DebitsService {
         payers: { user: { person: true } },
         owner: { person: true },
       },
+    });
+  }
+
+  private resolveDateFilter({
+    fromDate,
+    toDate,
+  }: {
+    fromDate: Date;
+    toDate: Date;
+  }) {
+    if (fromDate && toDate) {
+      return { date: Between(fromDate, toDate) };
+    }
+    if (fromDate) {
+      return { date: MoreThanOrEqual(fromDate) };
+    }
+    if (toDate) {
+      return { date: LessThanOrEqual(toDate) };
+    }
+    return {};
+  }
+  async listByFilters(userId: string, search: SearchDebitsDto) {
+    const roles = {
+      owner: { owner: { id: userId } },
+      payer: { payers: { id: userId } },
+    };
+
+    const choosedRole = roles[search.role ?? 'all'] ?? {};
+    const dateFilter = this.resolveDateFilter(search);
+
+    const statusFilter = { status: search.status?.toUpperCase() };
+    return await this.debitRepository.find({
+      where: { ...dateFilter, ...choosedRole, ...statusFilter },
+      relations: {
+        owner: { person: true },
+        payers: { user: { person: true } },
+      },
+      skip: search.offset,
+      take: search.limit,
     });
   }
 }
