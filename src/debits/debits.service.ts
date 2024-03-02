@@ -100,6 +100,7 @@ export class DebitsService {
         (userPayer?.weight || 0)
       ).toFixed(2),
       isOwner: debit.owner?.id === userId,
+      paid: userPayer.paymentStatus === 'PAID',
     };
   }
   async listByFilters(userId: string, search: SearchDebitsDto) {
