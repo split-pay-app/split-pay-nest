@@ -7,6 +7,7 @@ import { UpdateDebitDto } from './dto/update-debit.dto';
 import { AddPayerDto } from './dto/add-payer-dto';
 import { DebitPayer } from './entities/debitPayer.entity';
 import { SearchDebitsDto } from './dto/search-debits.dto';
+import { EditPayerDto } from './dto/edit-payer-dto';
 
 @Injectable()
 export class DebitsService {
@@ -43,7 +44,9 @@ export class DebitsService {
         owner: { person: true },
       },
     });
-
+    if (!debit) {
+      throw new NotFoundException({ message: 'Debit not found' });
+    }
     return this.calculateShouldPay(userId, debit);
   }
 
@@ -135,5 +138,17 @@ export class DebitsService {
     });
 
     return debits.map((debit) => this.calculateShouldPay(userId, debit));
+  }
+
+  async editPayer(userId: string, payerId: string, payer: EditPayerDto) {
+    const payerFound = await this.debitPayerRepository.findOne({
+      where: { id: payerId, debit: { owner: { id: userId } } },
+      relations: { debit: { owner: true } },
+    });
+    if (!payerFound) {
+      throw new NotFoundException({ message: 'Payer not found' });
+    }
+
+    return await this.debitPayerRepository.save({ id: payerId, ...payer });
   }
 }

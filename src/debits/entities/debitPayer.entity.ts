@@ -18,7 +18,7 @@ export class DebitPayer {
   @ManyToOne(() => User, (user) => user.payers)
   user: User;
 
-  @Column({ default: 1 })
+  @Column({ default: 1, type: 'float' })
   weight: number;
 
   @ManyToOne(() => Debit, (debit) => debit.payers)

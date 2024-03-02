@@ -14,6 +14,7 @@ import { UserId } from 'src/decorators/userId.decorator';
 import { UpdateDebitDto } from './dto/update-debit.dto';
 import { AddPayerDto } from './dto/add-payer-dto';
 import { SearchDebitsDto } from './dto/search-debits.dto';
+import { EditPayerDto } from './dto/edit-payer-dto';
 
 @Controller('debits')
 export class DebitsController {
@@ -74,5 +75,16 @@ export class DebitsController {
     });
 
     return { debits, page: search.page, limit: search.limit };
+  }
+
+  @Patch('/payers/:payerId')
+  @UseGuards(AuthGuard)
+  async editPayer(
+    @Body() payer: EditPayerDto,
+    @Param('payerId') payerId: string,
+    @UserId() userId: string,
+  ) {
+    const result = await this.debitsService.editPayer(userId, payerId, payer);
+    return result;
   }
 }
