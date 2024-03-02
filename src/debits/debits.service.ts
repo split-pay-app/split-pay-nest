@@ -78,18 +78,41 @@ export class DebitsService {
     }
     return {};
   }
-  async listByFilters(userId: string, search: SearchDebitsDto) {
-    const roles = {
-      owner: { owner: { id: userId } },
-      payer: { payers: { id: userId } },
-    };
 
-    const choosedRole = roles[search.role ?? 'all'] ?? {};
+  private calculateShouldPay(userId: string, debit: Debit) {
+    const userPayer = debit.payers.find((payer) => payer.user.id === userId);
+    return {
+      ...debit,
+      shouldPay: (
+        (debit.totalValue / (debit.payers.length || 1)) *
+        (userPayer?.weight || 0)
+      ).toFixed(2),
+      isOwner: debit.owner?.id === userId,
+    };
+  }
+  async listByFilters(userId: string, search: SearchDebitsDto) {
     const dateFilter = this.resolveDateFilter(search);
 
     const statusFilter = { status: search.status?.toUpperCase() };
-    return await this.debitRepository.find({
-      where: { ...dateFilter, ...choosedRole, ...statusFilter },
+
+    const roles = {
+      owner: { owner: { id: userId } },
+      payer: { payers: { id: userId } },
+      all: [{ owner: { id: userId } }, { payers: { user: { id: userId } } }],
+    };
+
+    const choosedRole = roles[search.role];
+
+    const filter =
+      search.role === 'all' || !search.role || choosedRole
+        ? [
+            { ...roles.all[0], ...dateFilter, ...statusFilter },
+            { ...roles.all[1], ...dateFilter, ...statusFilter },
+          ]
+        : { ...dateFilter, ...choosedRole, ...statusFilter };
+
+    const debits = await this.debitRepository.find({
+      where: filter,
       relations: {
         owner: { person: true },
         payers: { user: { person: true } },
@@ -97,5 +120,7 @@ export class DebitsService {
       skip: search.offset,
       take: search.limit,
     });
+
+    return debits.map((debit) => this.calculateShouldPay(userId, debit));
   }
 }
