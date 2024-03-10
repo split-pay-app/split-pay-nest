@@ -6,9 +6,14 @@ import { Person } from './entities/person.entity';
 import { User } from 'src/users/entities/user.entity';
 
 import { UsersModule } from 'src/users/users.module';
+import { TokensModule } from 'src/tokens/tokens.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Person, User]), UsersModule],
+  imports: [
+    TokensModule,
+    TypeOrmModule.forFeature([Person, User]),
+    UsersModule,
+  ],
   controllers: [PersonsController],
   providers: [PersonsService],
 })

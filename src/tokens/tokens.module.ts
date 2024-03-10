@@ -15,5 +15,6 @@ import { TokenProcessor } from './queue/token.processor';
   ],
   controllers: [TokensController],
   providers: [TokenProcessor, TokensService],
+  exports: [TokensService],
 })
 export class TokensModule {}
