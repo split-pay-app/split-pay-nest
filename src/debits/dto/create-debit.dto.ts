@@ -1,3 +1,5 @@
+import { UpsertAddressDto } from 'src/address/dto/upsert-address.dto';
+
 export class CreateDebitDto {
   title: string;
   date: Date;
@@ -7,4 +9,5 @@ export class CreateDebitDto {
   totalValue: number;
   status: string;
   owner: string;
+  address: UpsertAddressDto;
 }

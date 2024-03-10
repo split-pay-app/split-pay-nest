@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PersonsModule } from './persons/persons.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentMadeRequestModule } from './payment-made-request/payment-made-request.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PaymentMadeRequestModule } from './payment-made-request/payment-made-re
     PersonsModule,
     AuthModule,
     PaymentMadeRequestModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

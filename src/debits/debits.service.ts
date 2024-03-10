@@ -8,6 +8,7 @@ import { AddPayerDto } from './dto/add-payer-dto';
 import { DebitPayer } from './entities/debitPayer.entity';
 import { SearchDebitsDto } from './dto/search-debits.dto';
 import { EditPayerDto } from './dto/edit-payer-dto';
+import { AddressService } from 'src/address/address.service';
 
 @Injectable()
 export class DebitsService {
@@ -15,11 +16,19 @@ export class DebitsService {
     @InjectRepository(Debit) private debitRepository: Repository<Debit>,
     @InjectRepository(DebitPayer)
     private debitPayerRepository: Repository<DebitPayer>,
+    private addressService: AddressService,
   ) {}
   async create(createDebitDto: CreateDebitDto) {
-    const debit = this.debitRepository.create(createDebitDto);
+    const [address] =
+      createDebitDto.address &&
+      (await this.addressService.upsertAddress(createDebitDto.address));
 
-    return this.debitRepository.save(debit);
+    const debit = this.debitRepository.create(createDebitDto);
+    debit.address = address.id;
+
+    const debitSaved = await this.debitRepository.save(debit);
+
+    return debitSaved;
   }
 
   async update(id: string, updateDebitDto: UpdateDebitDto) {
@@ -38,10 +47,14 @@ export class DebitsService {
 
   async getDebit(userId: string, debitId: string) {
     const debit = await this.debitRepository.findOne({
-      where: { id: debitId },
+      where: [
+        { id: debitId, payers: { user: { id: userId } } },
+        { id: debitId, owner: { id: userId } },
+      ],
       relations: {
         payers: { user: { person: true } },
         owner: { person: true },
+        address: true,
       },
     });
     if (!debit) {
@@ -96,6 +109,7 @@ export class DebitsService {
 
   private calculateShouldPay(userId: string, debit: Debit) {
     const userPayer = debit.payers.find((payer) => payer.user.id === userId);
+
     return {
       ...debit,
       shouldPay: (
@@ -103,7 +117,7 @@ export class DebitsService {
         (userPayer?.weight || 0)
       ).toFixed(2),
       isOwner: debit.owner?.id === userId,
-      paid: userPayer.paymentStatus === 'PAID',
+      paid: userPayer?.paymentStatus === 'PAID',
     };
   }
   async listByFilters(userId: string, search: SearchDebitsDto) {

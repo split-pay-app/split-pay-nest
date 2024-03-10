@@ -3,14 +3,17 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { CreateDebitDto } from '../dto/create-debit.dto';
 import { DebitPayer } from './debitPayer.entity';
+import { Address } from 'src/address/entities/address.entity';
 
 @Entity('debits')
 export class Debit {
@@ -56,4 +59,8 @@ export class Debit {
   @OneToMany(() => DebitPayer, (payer) => payer.debit)
   @JoinTable()
   payers: DebitPayer[];
+
+  @OneToOne(() => Address, (addres) => addres.debit)
+  @JoinColumn()
+  address: Address;
 }
