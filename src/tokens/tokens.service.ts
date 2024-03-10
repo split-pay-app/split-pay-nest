@@ -18,8 +18,8 @@ export class TokensService {
   }
 
   async verify(verifyTokenDto: VerifyTokenDto) {
-    return this.tokenRepository.findOne({
+    return !!(await this.tokenRepository.findOne({
       where: { entity: verifyTokenDto.entity, token: verifyTokenDto.token },
-    });
+    }));
   }
 }

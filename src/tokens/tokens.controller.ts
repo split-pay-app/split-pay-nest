@@ -16,7 +16,7 @@ export class TokensController {
   }
 
   @Post('verify')
-  verify(@Body() verifyTokenDto: VerifyTokenDto) {
-    return this.tokensService.verify(verifyTokenDto);
+  async verify(@Body() verifyTokenDto: VerifyTokenDto) {
+    return { verified: await this.tokensService.verify(verifyTokenDto) };
   }
 }
