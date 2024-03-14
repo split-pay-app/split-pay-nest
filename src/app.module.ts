@@ -5,7 +5,7 @@ import { UsersModule } from './users/users.module';
 import { DebitsModule } from './debits/debits.module';
 
 import { DatabaseModule } from './database/database.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PersonsModule } from './persons/persons.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentMadeRequestModule } from './payment-made-request/payment-made-request.module';
@@ -16,12 +16,14 @@ import { BullModule } from '@nestjs/bull';
 @Module({
   imports: [
     BullModule.forRootAsync({
-      useFactory: () => ({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
         redis: {
-          host: 'localhost',
-          port: 6379,
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
         },
       }),
+      inject: [ConfigService],
     }),
     ConfigModule.forRoot({
       isGlobal: true,
