@@ -4,6 +4,8 @@ import {
   Body,
   UnauthorizedException,
   Patch,
+  Get,
+  UseGuards,
 } from '@nestjs/common';
 import { PersonsService } from './persons.service';
 import { CreatePersonDto } from './dto/create-person.dto';
@@ -11,6 +13,8 @@ import { UsersService } from 'src/users/users.service';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { TokensService } from 'src/tokens/tokens.service';
 import { ConfigService } from '@nestjs/config';
+import { UserId } from 'src/decorators/userId.decorator';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('persons')
 export class PersonsController {
@@ -70,8 +74,18 @@ export class PersonsController {
   }
 
   @Patch()
-  async update(@Body() updatePersonDto: UpdatePersonDto) {
-    const person = await this.personsService.update(updatePersonDto);
+  @UseGuards(AuthGuard)
+  async update(
+    @Body() updatePersonDto: UpdatePersonDto,
+    @UserId() userId: string,
+  ) {
+    const person = await this.personsService.update(userId, updatePersonDto);
     return person;
+  }
+  @Get()
+  @UseGuards(AuthGuard)
+  async getUser(@UserId() userId: string) {
+    const person = await this.personsService.getPerson(userId);
+    return { user: person };
   }
 }

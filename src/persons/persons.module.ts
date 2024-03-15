@@ -7,9 +7,11 @@ import { User } from 'src/users/entities/user.entity';
 
 import { UsersModule } from 'src/users/users.module';
 import { TokensModule } from 'src/tokens/tokens.module';
+import { EncrypterModule } from 'src/encrypter/encrypter.module';
 
 @Module({
   imports: [
+    EncrypterModule,
     TokensModule,
     TypeOrmModule.forFeature([Person, User]),
     UsersModule,

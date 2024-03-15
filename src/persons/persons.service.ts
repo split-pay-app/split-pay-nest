@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 
 import { DataSource } from 'typeorm';
@@ -46,10 +50,22 @@ export class PersonsService {
     return { ...person, user: savedUser };
   }
 
-  async update(createPersonDto: UpdatePersonDto): Promise<Person> {
+  async update(
+    userId: string,
+    createPersonDto: UpdatePersonDto,
+  ): Promise<Person> {
+    const user = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { id: userId }, relations: { person: true } });
+    if (!user) {
+      throw new ForbiddenException({
+        message: 'Unauthorized to perform this operation',
+      });
+    }
     let person = null;
     let savedUser = null;
     const userParams = {
+      id: userId,
       password: createPersonDto.password,
       taxpayerNumber: createPersonDto.taxpayerNumber,
     };
@@ -61,6 +77,7 @@ export class PersonsService {
       savedUser = await queryRunner.manager.save(User, userParams);
       person = await queryRunner.manager.save(Person, {
         ...createPersonDto,
+        id: user.person.id,
         user: savedUser,
       });
       await queryRunner.commitTransaction();
@@ -74,5 +91,11 @@ export class PersonsService {
     }
 
     return { ...person, user: savedUser };
+  }
+
+  async getPerson(userId: string) {
+    return this.dataSource
+      .getRepository(User)
+      .findOne({ where: { id: userId }, relations: { person: true } });
   }
 }
