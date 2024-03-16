@@ -5,7 +5,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 
 import { ConfigService } from '@nestjs/config';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -19,6 +19,30 @@ export class UsersService {
     this.saltsOrRounds = Number(this.config.get('SALTS') || 10);
   }
 
+  async findUsers({
+    term,
+    offset,
+    limit,
+  }: {
+    term: string;
+    offset: number;
+    limit: number;
+  }) {
+    const conditions = [
+      { taxpayerNumber: term },
+      { phoneNumber: term },
+      { email: term },
+      { person: { firstName: Like(`%${term}%`) } },
+      { person: { lastName: Like(`%${term}%`) } },
+      { person: { lastName: Like(`%${term}%`) } },
+    ];
+    return this.userRepository.find({
+      where: conditions,
+      relations: { person: true },
+      take: limit,
+      skip: offset,
+    });
+  }
   async generateUser({
     email,
     password,

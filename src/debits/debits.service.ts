@@ -20,11 +20,12 @@ export class DebitsService {
   ) {}
   async create(createDebitDto: CreateDebitDto) {
     const [address] =
-      createDebitDto.address &&
-      (await this.addressService.upsertAddress(createDebitDto.address));
+      (createDebitDto.address &&
+        (await this.addressService.upsertAddress(createDebitDto.address))) ||
+      [];
 
     const debit = this.debitRepository.create(createDebitDto);
-    debit.address = address.id;
+    debit.address = address?.id;
 
     const debitSaved = await this.debitRepository.save(debit);
 

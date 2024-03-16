@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Get,
+  HttpCode,
 } from '@nestjs/common';
 import { DebitsService } from './debits.service';
 import { CreateDebitDto } from './dto/create-debit.dto';
@@ -66,6 +67,7 @@ export class DebitsController {
   }
 
   @Post('/show')
+  @HttpCode(200)
   @UseGuards(AuthGuard)
   async list(@Body() search: SearchDebitsDto, @UserId() userId: string) {
     const offset = (search.page - 1) * search.limit;
