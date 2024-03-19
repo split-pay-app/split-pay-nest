@@ -89,4 +89,13 @@ export class DebitsController {
     const result = await this.debitsService.editPayer(userId, payerId, payer);
     return result;
   }
+
+  @Get('receive/amount')
+  @UseGuards(AuthGuard)
+  async getAmountToReceive(@UserId() userId: string) {
+    const amount = await this.debitsService.toReceive(userId);
+    return {
+      amount,
+    };
+  }
 }

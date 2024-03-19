@@ -18,6 +18,23 @@ export class DebitsService {
     private debitPayerRepository: Repository<DebitPayer>,
     private addressService: AddressService,
   ) {}
+  async toReceive(userId: string) {
+    const result = await this.debitPayerRepository.find({
+      where: {
+        debit: { owner: { id: userId } },
+        paymentStatus: 'WAITING',
+      },
+      relations: { debit: { payers: { user: true } }, user: true },
+    });
+
+    const toReceive = result.reduce(
+      (acc, payer) =>
+        acc + this.calculateShouldPay(payer.user.id, payer.debit).shouldPay,
+      0,
+    );
+
+    return toReceive;
+  }
   async create(createDebitDto: CreateDebitDto) {
     const [address] =
       (createDebitDto.address &&
@@ -113,10 +130,12 @@ export class DebitsService {
 
     return {
       ...debit,
-      shouldPay: (
-        (debit.totalValue / (debit.payers.length || 1)) *
-        (userPayer?.weight || 0)
-      ).toFixed(2),
+      shouldPay: Number(
+        (
+          (debit.totalValue / (debit.payers.length || 1)) *
+          (userPayer?.weight || 0)
+        ).toFixed(2),
+      ),
       isOwner: debit.owner?.id === userId,
       paid: userPayer?.paymentStatus === 'PAID',
     };
