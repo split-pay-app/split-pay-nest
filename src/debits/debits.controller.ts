@@ -7,6 +7,7 @@ import {
   Patch,
   Get,
   HttpCode,
+  Query,
 } from '@nestjs/common';
 import { DebitsService } from './debits.service';
 import { CreateDebitDto } from './dto/create-debit.dto';
@@ -21,6 +22,37 @@ import { EditPayerDto } from './dto/edit-payer-dto';
 export class DebitsController {
   constructor(private readonly debitsService: DebitsService) {}
 
+  @Get('/debitors')
+  @UseGuards(AuthGuard)
+  async getAmountToEarn(
+    @UserId() userId: string,
+    @Query('page') pageParam = 1,
+    @Query('limit') limitParam = 10,
+  ) {
+    const page = Number(pageParam) || 1;
+    const limit = Number(limitParam) || 10;
+
+    const offset = (page - 1) * limit;
+    const debitors = await this.debitsService.getAllDebitors(
+      userId,
+      limit,
+      offset,
+    );
+    return {
+      debitors,
+      page,
+      limit,
+    };
+  }
+
+  @Get('/debitors/amount')
+  @UseGuards(AuthGuard)
+  async getAmountToReceive(@UserId() userId: string) {
+    const amount = await this.debitsService.toReceive(userId);
+    return {
+      amount,
+    };
+  }
   @Post()
   @UseGuards(AuthGuard)
   async create(
@@ -88,14 +120,5 @@ export class DebitsController {
   ) {
     const result = await this.debitsService.editPayer(userId, payerId, payer);
     return result;
-  }
-
-  @Get('receive/amount')
-  @UseGuards(AuthGuard)
-  async getAmountToReceive(@UserId() userId: string) {
-    const amount = await this.debitsService.toReceive(userId);
-    return {
-      amount,
-    };
   }
 }

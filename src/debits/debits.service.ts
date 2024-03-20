@@ -18,6 +18,7 @@ export class DebitsService {
     private debitPayerRepository: Repository<DebitPayer>,
     private addressService: AddressService,
   ) {}
+
   async toReceive(userId: string) {
     const result = await this.debitPayerRepository.find({
       where: {
@@ -184,5 +185,24 @@ export class DebitsService {
     }
 
     return await this.debitPayerRepository.save({ id: payerId, ...payer });
+  }
+
+  async getAllDebitors(userId: string, limit: number, offset: number) {
+    const result = await this.debitPayerRepository.find({
+      where: {
+        debit: { owner: { id: userId } },
+        paymentStatus: 'WAITING',
+      },
+      relations: { debit: { payers: { user: true } }, user: true },
+      skip: offset,
+      take: limit,
+    });
+
+    const toReceive = result.map((payer) => ({
+      ...payer,
+      shouldPay: this.calculateShouldPay(payer.user.id, payer.debit).shouldPay,
+    }));
+
+    return toReceive;
   }
 }
