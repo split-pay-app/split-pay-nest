@@ -8,6 +8,8 @@ import { ConfigService } from '@nestjs/config';
 import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { TokensService } from 'src/tokens/tokens.service';
+
 @Injectable()
 export class UsersService {
   private saltsOrRounds: number;
@@ -15,10 +17,13 @@ export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private config: ConfigService,
+    private tokenService: TokensService,
   ) {
     this.saltsOrRounds = Number(this.config.get('SALTS') || 10);
   }
-
+  async forgotPassword(email: string) {
+    await this.tokenService.create({ type: 'EMAIL', entity: email });
+  }
   async findUsers({
     term,
     offset,

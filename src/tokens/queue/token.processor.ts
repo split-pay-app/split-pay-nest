@@ -26,9 +26,7 @@ export class TokenProcessor {
     });
 
     if (type === 'PHONE') {
-      this.logger.log(
-        `Bem vindo ao splitpay, seu codigo de verificação é: ${sixDigitToken}`,
-      );
+      this.logger.log(`Seu codigo de verificação é: ${sixDigitToken}`);
     } else {
       this.logger.log(
         JSON.stringify({

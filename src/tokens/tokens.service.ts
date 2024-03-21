@@ -6,7 +6,6 @@ import { InjectQueue } from '@nestjs/bull';
 import { Repository } from 'typeorm';
 import { Token } from './entities/token.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
 @Injectable()
 export class TokensService {
   constructor(
